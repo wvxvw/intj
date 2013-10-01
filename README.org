@@ -1,0 +1,93 @@
+* Original Text of the Assginment
+** =Walla!= Backend Engineers Test Assignment
+   
+   Heya,
+   In order to evaluate your skills as a backend Web engineer, we
+   would like you to take this short development assignment, at your
+   own free time.
+   
+*** General Guidelines:
+    1. Please provide
+       - working code.
+       - a brief design document explaining what you did.
+       - a link to a server where your code can be tested.
+        
+    2. Feel free to search the Web for inspiration, but please do not
+       copy code from anywhere, keep it 100% yours.
+      
+    3. Use Python as your language of implementation. Micro​ Frameworks
+       and utility libraries are allowed, but not a full blown MVC.
+
+*** The Test Assignment:
+    You are to design and implement the API and server side modules
+    for a simplified twitter like social updates site, and a simple
+    AJAX client for it. The application contains users; Each user can
+    post short text messages, follow other users, and get a feed of
+    the latest updates from the users he is following. You can also
+    get a global feed for all the users.
+    
+    1. Implement an HTTP based (ReSTful in the loose sense of the
+       term) API that exposes the following calls (no need for
+       authentication, choose the format you like):
+       - =CreateUser(UserName)=
+       - =PostMessage(UserId, MessageText)=
+       - =Follow(FollowingUser, FollowedUser)=
+       - =Unfollow(FollwingUser, UnfollowedUser)=
+       - =GetFeed(ForUserId)= /Note the aggregate feed of the users/
+         /this user is following!/
+       - =GetGlobalFeed()=
+    2. Please create an ajax based HTML page for this API:
+       - Interface ​
+         It should support getting the messages from the followed
+         users per user Id, with real time updates, and the ability to
+         post messages. You do not need to implement
+         following/unfollowing. No styling required.
+       - Implementation
+         Use of toolkits (jQuery, Zepto, bootstrap..) is fine, but no
+         frameworks plz (Angular, Backbone..). No need for mobile
+         adaption. Strive for efficiency and readability.
+         
+    Good Luck!
+    The Walla! Backend Engineering Team
+
+* What Needs to Be Done
+
+** TODO Install and test Tornado                                      :setup:
+   DEADLINE: <2013-10-01 Tue>
+   Was suggested during the interview
+
+** TODO Make sure MySQL binding is up-to-date            :setup:alternatives:
+   DEADLINE: <2013-10-01 Tue>
+   I have some vague memories of it being problematic to install,
+   perhaps it required =mysql-dvel= package? Can =setuptools=
+   install RPM / DEB?
+
+** TODO Maybe try =py2neo=                               :setup:alternatives:
+   DEADLINE: <2013-10-02 Wed>
+   Just for the sake of experiment? There are couple of vieos to
+   watch. If I can get it to run easily, I'd probably use that.
+
+** TODO Firgure out what Apache httpd module to use              :setup:info:
+   DEADLINE: <2013-10-01 Tue>
+   There is some controversy about =WSGI= / =FSGI= / =mode_python=
+   Need to make sure I'm not using some outdated / unsupported
+   library.
+
+** TODO Brush up on Tweeter Bootstrap                            :setup:info:
+   DEADLINE: <2013-10-01 Tue>
+   This is most likely candidate for the GUI. Need to see what
+   componentes are already there, and what's missing (unlikely).
+
+** TODO Find out what most people use for unit testing           :setup:info:
+   DEADLINE: <2013-10-02 Wed>
+   We'll see what Stackoverflow has to say...
+   
+** TODO Ropemacs was giving me headache lately                        :setup:
+   DEADLINE: <2013-10-02 Wed>
+   See if the stupid thing still works. Maybe we shall do w/o it.
+   There was some other package... Probably elpy or some such,
+   maybe it makes sense to check it out.
+
+** TODO Start a GitHub repo (and fix the setup)                       :setup:
+   DEADLINE: <2013-10-02 Wed>
+   Not today.
