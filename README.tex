@@ -1,0 +1,210 @@
+% Created 2013-10-02 Wed 09:57
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{fixltx2e}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{float}
+\usepackage{wrapfig}
+\usepackage{soul}
+\usepackage{textcomp}
+\usepackage{marvosym}
+\usepackage{wasysym}
+\usepackage{latexsym}
+\usepackage{amssymb}
+\usepackage{hyperref}
+\tolerance=1000
+\usepackage{amsmath}
+\providecommand{\alert}[1]{\textbf{#1}}
+
+\title{README}
+\author{Oleg Sivokon}
+\date{\today}
+\hypersetup{
+  pdfkeywords={},
+  pdfsubject={},
+  pdfcreator={Emacs Org-mode version 7.9.3f}}
+
+\begin{document}
+
+\maketitle
+
+\setcounter{tocdepth}{3}
+\tableofcontents
+\vspace*{1cm}
+
+\section{Original Text of the Assignment}
+\label{sec-1}
+\subsection{\texttt{Walla!} Backend Engineers Test Assignment}
+\label{sec-1-1}
+
+   
+   Heya,
+   In order to evaluate your skills as a backend Web engineer, we
+   would like you to take this short development assignment, at your
+   own free time.
+   
+\subsubsection{General Guidelines:}
+\label{sec-1-1-1}
+
+\begin{enumerate}
+\item Please provide
+\begin{itemize}
+\item working code.
+\item a brief design document explaining what you did.
+\item a link to a server where your code can be tested.
+\end{itemize}
+\item Feel free to search the Web for inspiration, but please do not
+       copy code from anywhere, keep it 100\% yours.
+\item Use Python as your language of implementation. Micro​ Frameworks
+       and utility libraries are allowed, but not a full blown MVC.
+\end{enumerate}
+\subsubsection{The Test Assignment:}
+\label{sec-1-1-2}
+
+    You are to design and implement the API and server side modules
+    for a simplified twitter like social updates site, and a simple
+    AJAX client for it. The application contains users; Each user can
+    post short text messages, follow other users, and get a feed of
+    the latest updates from the users he is following. You can also
+    get a global feed for all the users.
+    
+\begin{enumerate}
+\item Implement an HTTP based (ReSTful in the loose sense of the
+       term) API that exposes the following calls (no need for
+       authentication, choose the format you like):
+\begin{itemize}
+\item \texttt{CreateUser(UserName)}
+\item \texttt{PostMessage(UserId, MessageText)}
+\item \texttt{Follow(FollowingUser, FollowedUser)}
+\item \texttt{Unfollow(FollwingUser, UnfollowedUser)}
+\item \texttt{GetFeed(ForUserId)} \emph{Note the aggregate feed of the users}
+         \emph{this user is following!}
+\item \texttt{GetGlobalFeed()}
+\end{itemize}
+\item Please create an ajax based HTML page for this API:
+\begin{itemize}
+\item Interface ​
+         It should support getting the messages from the followed
+         users per user Id, with real time updates, and the ability to
+         post messages. You do not need to implement
+         following/unfollowing. No styling required.
+\item Implementation
+         Use of toolkits (jQuery, Zepto, bootstrap..) is fine, but no
+         frameworks plz (Angular, Backbone..). No need for mobile
+         adaption. Strive for efficiency and readability.
+\end{itemize}
+\end{enumerate}
+         
+    Good Luck!
+    The Walla! Backend Engineering Team
+\section{What Needs to Be Done}
+\label{sec-2}
+\subsection{\textbf{DONE} Install and test Tornado \textbf{:setup:}}
+\label{sec-2-1}
+
+   \texttt{DEADLINE:} \textit{2013-10-01 Tue}
+
+\begin{itemize}
+\item State ``DONE''       from ``TODO''       \textit{2013-10-02 Wed 08:20} \\
+This was the easy part.
+\end{itemize}
+   Was suggested during the interview
+\subsection{\textbf{CANCELED} Make sure MySQL binding is up-to-date \textbf{:setup:alternatives:}}
+\label{sec-2-2}
+
+   \texttt{DEADLINE:} \textit{2013-10-01 Tue}
+
+\begin{itemize}
+\item State ``CANCELED''   from ``TODO''       \textit{2013-10-02 Wed 08:21} \\
+I'll be using \texttt{neo4j}, that's decided.
+\end{itemize}
+   I have some vague memories of it being problematic to install,
+   perhaps it required \texttt{mysql-devel} package? Can \texttt{setuptools}
+   install RPM / DEB?
+\subsection{\textbf{DONE} Maybe try \texttt{py2neo} \textbf{:setup:alternatives:}}
+\label{sec-2-3}
+
+   \texttt{DEADLINE:} \textit{2013-10-02 Wed}
+
+\begin{itemize}
+\item State ``DONE''       from ``TODO''       \textit{2013-10-02 Wed 08:21} \\
+Yup.
+\end{itemize}
+   Just for the sake of experiment? There are couple of videos to
+   watch. If I can get it to run easily, I'd probably use that.
+\subsection{\textbf{TODO} Figure out what Apache httpd module to use \textbf{:setup:info:}}
+\label{sec-2-4}
+
+   \texttt{DEADLINE:} \textit{2013-10-01 Tue}
+
+   There is some controversy about \texttt{WSGI} / \texttt{FSGI} / \texttt{mode\_python}
+   Need to make sure I'm not using some outdated / unsupported
+   library.
+\subsection{\textbf{TODO} Brush up on Tweeter Bootstrap \textbf{:setup:info:}}
+\label{sec-2-5}
+
+   \texttt{DEADLINE:} \textit{2013-10-01 Tue}
+
+   This is most likely candidate for the GUI. Need to see what
+   components are already there, and what's missing (unlikely).
+\subsection{\textbf{TODO} Find out what most people use for unit testing \textbf{:setup:info:}}
+\label{sec-2-6}
+
+   \texttt{DEADLINE:} \textit{2013-10-02 Wed}
+
+   We'll see what Stackoverflow has to say\ldots{}
+   
+\subsection{\textbf{TODO} Ropemacs was giving me headache lately \textbf{:setup:}}
+\label{sec-2-7}
+
+   \texttt{DEADLINE:} \textit{2013-10-02 Wed}
+
+   See if the stupid thing still works. Maybe we shall do w/o it.
+   There was some other package\ldots{} Probably elpy or some such,
+   maybe it makes sense to check it out.
+\subsection{\textbf{DONE} Start a GitHub repo (and fix the setup) \textbf{:setup:}}
+\label{sec-2-8}
+
+   \texttt{DEADLINE:} \textit{2013-10-02 Wed}
+
+\begin{itemize}
+\item State ``DONE''       from ``TODO''       \textit{2013-10-02 Wed 08:21} \\
+Looks like it also can now display Org files markup, so no need to
+     export to Markdown
+\end{itemize}
+   Not today.
+\section{Project Description}
+\label{sec-3}
+
+  Right now I'm thinking about making it into a \href{http://en.wikipedia.org/wiki/Nomic}{nomic} game.  The basic
+  idea would be that by posting users may, in general, score
+  points. More so, if someone comments on their posts, or if they
+  themselves comment. But it would be also possible to loose points
+  due to bad posts or comments. Sort of karma, just like there is one
+  on the StackExchange sites.
+
+  I'm definitely going with \texttt{py2neo}, especially because it uses
+  \texttt{tornado}. It's not as efficient as SQL (at the moment), but who
+  cares?
+\subsection{Nodes and relations I will need}
+\label{sec-3-1}
+
+   
+   Nodes
+\begin{itemize}
+\item \texttt{User\#\{ "id": int, "name": string, "password": string \}}
+\item \texttt{Message\#\{ "id": int, "text" : string, "score": int \}}
+\end{itemize}
+   
+   Relations
+\begin{itemize}
+\item $user \; \boldsymbol{Follows} \; user$
+\item $user \; \boldsymbol{FollowedBy} \; user$
+\item $message \; \boldsymbol{PostedBy} \; user$
+\item $user \; \boldsymbol{AuthorOf} \; message$
+\item $user \; \boldsymbol{Rates(points)} \; message$
+\end{itemize}
+
+\end{document}

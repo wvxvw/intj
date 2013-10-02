@@ -1,4 +1,5 @@
 #+TODO: TODO(t) WAIT(w@) | DONE(d@) CANCELED(c@)
+#+LATEX_HEADER: \usepackage{amsmath}
 
 * Original Text of the Assignment
 ** =Walla!= Backend Engineers Test Assignment
@@ -122,18 +123,8 @@
    - =Message#{ "id": int, "text" : string, "score": int }=
    
    Relations
-   - \being{equation*}
-     user \mathbb{Follows} user
-     \end{equation*}
-   - \being{equation*}
-     user \mathbb{FollowedBy} user
-     \end{equation*}
-   - \being{equation*}
-     message \mathbb{PostedBy} user
-     \end{equation*}
-   - \being{equation*}
-     user \mathbb{AuthorOf} message
-     \end{equation*}
-   - \being{equation*}
-     user \mathbb{Rates\(points\)} message
-     \end{equation*}
+   - $user \; \boldsymbol{Follows} \; user$
+   - $user \; \boldsymbol{FollowedBy} \; user$
+   - $message \; \boldsymbol{PostedBy} \; user$
+   - $user \; \boldsymbol{AuthorOf} \; message$
+   - $user \; \boldsymbol{Rates(points)} \; message$
