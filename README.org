@@ -1,4 +1,6 @@
-* Original Text of the Assginment
+#+TODO: TODO(t) WAIT(w@) | DONE(d@) CANCELED(c@)
+
+* Original Text of the Assignment
 ** =Walla!= Backend Engineers Test Assignment
    
    Heya,
@@ -52,22 +54,28 @@
 
 * What Needs to Be Done
 
-** TODO Install and test Tornado                                      :setup:
+** DONE Install and test Tornado                                      :setup:
    DEADLINE: <2013-10-01 Tue>
+   - State "DONE"       from "TODO"       [2013-10-02 Wed 08:20] \\
+     This was the easy part.
    Was suggested during the interview
 
-** TODO Make sure MySQL binding is up-to-date            :setup:alternatives:
+** CANCELED Make sure MySQL binding is up-to-date        :setup:alternatives:
    DEADLINE: <2013-10-01 Tue>
+   - State "CANCELED"   from "TODO"       [2013-10-02 Wed 08:21] \\
+     I'll be using =neo4j=, that's decided.
    I have some vague memories of it being problematic to install,
-   perhaps it required =mysql-dvel= package? Can =setuptools=
+   perhaps it required =mysql-devel= package? Can =setuptools=
    install RPM / DEB?
 
-** TODO Maybe try =py2neo=                               :setup:alternatives:
+** DONE Maybe try =py2neo=                               :setup:alternatives:
    DEADLINE: <2013-10-02 Wed>
-   Just for the sake of experiment? There are couple of vieos to
+   - State "DONE"       from "TODO"       [2013-10-02 Wed 08:21] \\
+     Yup.
+   Just for the sake of experiment? There are couple of videos to
    watch. If I can get it to run easily, I'd probably use that.
 
-** TODO Firgure out what Apache httpd module to use              :setup:info:
+** TODO Figure out what Apache httpd module to use              :setup:info:
    DEADLINE: <2013-10-01 Tue>
    There is some controversy about =WSGI= / =FSGI= / =mode_python=
    Need to make sure I'm not using some outdated / unsupported
@@ -76,7 +84,7 @@
 ** TODO Brush up on Tweeter Bootstrap                            :setup:info:
    DEADLINE: <2013-10-01 Tue>
    This is most likely candidate for the GUI. Need to see what
-   componentes are already there, and what's missing (unlikely).
+   components are already there, and what's missing (unlikely).
 
 ** TODO Find out what most people use for unit testing           :setup:info:
    DEADLINE: <2013-10-02 Wed>
@@ -88,6 +96,44 @@
    There was some other package... Probably elpy or some such,
    maybe it makes sense to check it out.
 
-** TODO Start a GitHub repo (and fix the setup)                       :setup:
+** DONE Start a GitHub repo (and fix the setup)                       :setup:
    DEADLINE: <2013-10-02 Wed>
+   - State "DONE"       from "TODO"       [2013-10-02 Wed 08:21] \\
+     Looks like it also can now display Org files markup, so no need to
+     export to Markdown
    Not today.
+
+* Project Description
+  Right now I'm thinking about making it into a [[http://en.wikipedia.org/wiki/Nomic][nomic]] game.  The basic
+  idea would be that by posting users may, in general, score
+  points. More so, if someone comments on their posts, or if they
+  themselves comment. But it would be also possible to loose points
+  due to bad posts or comments. Sort of karma, just like there is one
+  on the StackExchange sites.
+
+  I'm definitely going with =py2neo=, especially because it uses
+  =tornado=. It's not as efficient as SQL (at the moment), but who
+  cares?
+
+** Nodes and relations I will need
+   
+   Nodes
+   - =User#{ "id": int, "name": string, "password": string }=
+   - =Message#{ "id": int, "text" : string, "score": int }=
+   
+   Relations
+   - \being{equation*}
+     user \mathbb{Follows} user
+     \end{equation*}
+   - \being{equation*}
+     user \mathbb{FollowedBy} user
+     \end{equation*}
+   - \being{equation*}
+     message \mathbb{PostedBy} user
+     \end{equation*}
+   - \being{equation*}
+     user \mathbb{AuthorOf} message
+     \end{equation*}
+   - \being{equation*}
+     user \mathbb{Rates\(points\)} message
+     \end{equation*}
