@@ -120,11 +120,14 @@
    
    Nodes
    - =User#{ "id": int, "name": string, "password": string }=
-   - =Message#{ "id": int, "text" : string, "score": int }=
+   - =Post#{ "id": int, "text" : string, "score": int }=
+   - =Comment#{ "id": int, "text" : string, "score": int}=
+     This is basically a reduced version of =Post=.
    
    Relations
-   - $user \; \boldsymbol{Follows} \; user$
-   - $user \; \boldsymbol{FollowedBy} \; user$
-   - $message \; \boldsymbol{PostedBy} \; user$
-   - $user \; \boldsymbol{AuthorOf} \; message$
-   - $user \; \boldsymbol{Rates(points)} \; message$
+   - $user \; \boldsymbol{Follows(privately)} \; user$
+   - $user \; \boldsymbol{FollowedBy(privately)} \; user$
+   - $post \; \boldsymbol{PostedBy(privately)} \; user$
+   - $user \; \boldsymbol{AuthorOf} \; post
+   - $user \; \boldsymbol{Rates(points)} \; post$
+   - $comment \; \boldsymbol{InResponseTo} \; comment$
