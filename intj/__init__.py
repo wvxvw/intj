@@ -11,7 +11,7 @@ from tornado.options import define, options
 from tornado.httputil import url_concat
 import tornado.web
 import bcrypt
-import json
+# import json
 
 logging.basicConfig(level = logging.INFO)
 
@@ -143,12 +143,12 @@ class IntjCrud():
         return self.db.node(user_id)
 
     def post_message(self, user_id, message):
-        self.db.create(node(text = message['text'],
-                            posted = time.time()),
-                       rel(0, 'posted_by', user_id))
+        logging.info('Saving message by %s\n%s' % (user_id, message))
+        self.db.create(node(text = message, posted = time.time()),
+                       rel(0, 'posted_by', self.db.node(user_id)))
 
     def follow(self, follower_id, followed_id):
-        self.db.create(rel(follower_id, 'posted_by', followed_id))
+        self.db.create(rel(follower_id, 'follows', followed_id))
 
     def unfollow(self, follower_id, followed_id):
         pass
@@ -166,6 +166,12 @@ class BaseHandler(tornado.web.RequestHandler):
         if not self._crud:
                 self._crud = IntjCrud()
         return self._crud
+
+    def __init__(self, application, request, **kwargs):
+        super(BaseHandler, self).__init__(
+            application, request, **kwargs)
+        self.error_message = ''
+        self._crud = None
 
     def resolve_url(self, url):
         return '../html/' + url
@@ -194,16 +200,8 @@ class BaseHandler(tornado.web.RequestHandler):
 
 class LoginHandler(BaseHandler):
 
-    def __init__(self, application, request, **kwargs):
-        super(LoginHandler, self).__init__(
-            application, request, **kwargs)
-        self.error_message = ''
-        self._crud = None
-
     def get(self):
-        self.render(self.resolve_url('login.html'),
-                    next = self.get_argument('next', '/'),
-                    message = self.get_argument('error', ''))
+        self.render(self.resolve_url('login.html'))
 
     def register(self, username, password):
         logging.info('Registering new user %s with password %s' % (username, password))
@@ -257,9 +255,30 @@ class LoginHandler(BaseHandler):
 class ProfileHandler(BaseHandler):
     
     def get(self):
-        self.render(self.resolve_url('profile.html'),
-                    next = self.get_argument('next', '/'),
-                    message = self.get_argument('error', ''))
+        self.render(self.resolve_url('profile.html'))
+
+class EditorHandler(BaseHandler):
+    
+    def get(self):
+        self.render(self.resolve_url('editor.html'))
+
+class FeedHandler(BaseHandler):
+    
+    def post(self, user_id):
+        self.write({ 'feeds':[{'title': 'Foo', 'url': '/feed/123' },
+                              {'title': 'Baz', 'url': '/feed/456' },
+                              {'title': 'Bar', 'url': '/feed/789' }]})
+
+class PostHandler(BaseHandler):
+    
+    def post(self):
+        # tornado.escape.json_decode(self.request.body)
+        article = re.sub(r'<', r'&lt;',
+                         re.sub(r'>', r'&gt;', self.request.body))
+        user_password = self.get_current_user()
+        # This can be reduced to a single query
+        user = self.crud.get_user_by_password(user_password)
+        self.crud.post_message(user._id, article)
 
 class SocialNetwork():
 
@@ -269,6 +288,9 @@ class SocialNetwork():
         self.application = tornado.web.Application([
             (r'/login', LoginHandler),
             (r'/profile', ProfileHandler),
+            (r'/editor', EditorHandler),
+            (r'/post', PostHandler),
+            (r'/feed/([^\/]+)', FeedHandler),
         ], **settings)
         self.application.listen(options.port, **server_settings)
         tornado.ioloop.IOLoop.instance().start()

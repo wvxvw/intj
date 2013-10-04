@@ -11,4 +11,5 @@ setup(name             = 'intj',
       description      = 'A toy social network site.',
       long_description = open('README.org').read(),
       install_requires = ['tornado >=  3.1.1', 'py2neo >= 1.6.0',
-                          'httpstream >= 1.0.9', 'bcrypt >= 1.0.2'])
+                          'httpstream >= 1.0.9', 'bcrypt >= 1.0.2',
+                          'markdown >= 2.3.1'])

@@ -37,3 +37,5 @@ legend {
     background-repeat: no-repeat;
     background-position: calc(100% - 20px) 50%;
 }
+
+.template { display: none }

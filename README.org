@@ -76,14 +76,18 @@
    Just for the sake of experiment? There are couple of videos to
    watch. If I can get it to run easily, I'd probably use that.
 
-** TODO Figure out what Apache httpd module to use              :setup:info:
+** CANCELED Figure out what Apache httpd module to use           :setup:info:
    DEADLINE: <2013-10-01 Tue>
+   - State "CANCELED"   from "TODO"       [2013-10-04 Fri 19:08] \\
+     Using nginx, so no need for Apache modules
    There is some controversy about =WSGI= / =FSGI= / =mode_python=
    Need to make sure I'm not using some outdated / unsupported
    library.
 
-** TODO Brush up on Tweeter Bootstrap                            :setup:info:
+** DONE Brush up on Tweeter Bootstrap                            :setup:info:
    DEADLINE: <2013-10-01 Tue>
+   - State "DONE"       from "TODO"       [2013-10-04 Fri 19:09] \\
+     Welp, using it now.
    This is most likely candidate for the GUI. Need to see what
    components are already there, and what's missing (unlikely).
 
@@ -91,8 +95,10 @@
    DEADLINE: <2013-10-02 Wed>
    We'll see what Stackoverflow has to say...
    
-** TODO Ropemacs was giving me headache lately                        :setup:
+** DONE Ropemacs was giving me headache lately                        :setup:
    DEADLINE: <2013-10-02 Wed>
+   - State "DONE"       from "TODO"       [2013-10-04 Fri 19:09] \\
+     Been okay so far.
    See if the stupid thing still works. Maybe we shall do w/o it.
    There was some other package... Probably elpy or some such,
    maybe it makes sense to check it out.
@@ -103,6 +109,34 @@
      Looks like it also can now display Org files markup, so no need to
      export to Markdown
    Not today.
+
+** TODO Serve pages only within session                               :devel:
+   DEADLINE: <2013-10-05 Sat>
+   Now pages assume the user is inside session, but break wen it is not
+   the case. Need to redirect to login, when not in session.
+
+** TODO Fix input field width in login                                  :bug:
+   DEADLINE: <2013-10-05 Sat>
+   It must be using some default value, different in different browsers.
+   Must set it to something.
+
+** TODO Add tab navigator ot profile page                             :devel:
+   DEADLINE: <2013-10-05 Sat>
+   This is to switch between own profile, personal feed, collective feed.
+
+** TODO Add error reporting in login UI                               :devel:
+   DEADLINE: <2013-10-05 Sat>
+   Errors are reported from server, but not displayed in the client.
+
+** TODO Implement following / unfollowing                             :devel:
+   DEADLINE: <2013-10-05 Sat>
+   We already have a way to populate the content, not much remains
+   to be done.
+
+** TODO Implement =get_feed=                                          :devel:
+   DEADLINE: <2013-10-05 Sat>
+   Again, we already have the content, just write the aggreate
+   functions and be done with it.
 
 * Project Description
   Right now I'm thinking about making it into a [[http://en.wikipedia.org/wiki/Nomic][nomic]] game.  The basic
