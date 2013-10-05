@@ -13,6 +13,9 @@ import tornado.web
 import bcrypt
 # import json
 
+from patches import patch
+patch()
+
 logging.basicConfig(level = logging.INFO)
 
 logger = logging.getLogger(__name__)
@@ -29,88 +32,6 @@ server_settings = { 'xheaders' : True }
 
 salt = '$2a$12$5.OLqPRaoAhItdfAgNZZYe'
 
-# Patches (will need to put it in a separate file)
-# Maybe I'll need this, we'll see
-# import py2neo
-from py2neo.packages.httpstream.jsonstream \
-    import (AwaitingData, UnexpectedCharacter, Tokeniser, EndOfStream)
-# _Entity = py2neo.neo4j._Entity
-# entity_patch_ftype = type(_Entity.get_properties)
-
-def _read_digit(self):
-    pos = self.data.tell()
-    try:
-        digit = self._read()
-        if digit not in "0123456789eE-":
-            self.data.seek(pos)
-            raise UnexpectedCharacter(digit)
-    except AwaitingData:
-        self.data.seek(pos)
-        raise AwaitingData()
-    return digit
-
-def _read_number(self):
-    pos = self.data.tell()
-    src = []
-    has_fractional_part = False
-    try:
-        # check for sign
-        ch = self._peek()
-        if ch == '-':
-            src.append(self._read())
-        # read integer part
-        ch = self._read_digit()
-        src.append(ch)
-        if ch != '0':
-            while True:
-                try:
-                    src.append(self._read_digit())
-                except (UnexpectedCharacter, EndOfStream):
-                    break
-        try:
-            ch = self._peek()
-        except EndOfStream:
-            pass
-        # read fractional part
-        if ch == '.':
-            has_fractional_part = True
-            src.append(self._read())
-            while True:
-                try:
-                    src.append(self._read_digit())
-                except (UnexpectedCharacter, EndOfStream):
-                    break
-    except AwaitingData:
-        # number potentially incomplete: need to wait for
-        # further data or end of stream
-        self.data.seek(pos)
-        raise AwaitingData()
-    src = "".join(src)
-    if has_fractional_part:
-        return src, float(src)
-    else:
-        return src, int(src)
-
-# def entity_get_properties(self):
-#     if not self.is_abstract:
-#         size = 1024
-#         response = self._properties_resource._get()._response
-#         body = []
-#         while True:
-#             chunk = response.read(size)
-#             if chunk:
-#                 body.append(chunk)
-#             else:
-#                 break
-            
-#         logging.info('resources: %s' % body)
-#         self._properties = json.loads(''.join(body))
-#     return self._properties
-
-# _Entity.get_properties = entity_get_properties
-Tokeniser._read_digit = _read_digit
-Tokeniser._read_number = _read_number
-
 class IntjCrud():
 
     def __init__(self):
@@ -121,21 +42,17 @@ class IntjCrud():
                             password = user['password'],
                             registered = time.time()))
     
-    def sanitize(self, dangerous):
-        return '\\"'.join([re.sub(r'\\', r'\\\\', x)
-                           for x in dangerous.split('"')])
-        
     def get_user_by_password(self, password):
         query = neo4j.CypherQuery(
             self.db,
             """
             CYPHER 1.9
             START user = node(*)
-            WHERE user.password? = {password}
+            WHERE has(user.password) and user.password = {password}
             RETURN user
             """)
         try:
-            return query.execute(password = self.sanitize(password)).data[0][0]
+            return query.execute(password = password).data[0][0]
         except IndexError:
             return None
 
@@ -147,24 +64,75 @@ class IntjCrud():
         self.db.create(node(text = message, posted = time.time()),
                        rel(0, 'posted_by', self.db.node(user_id)))
 
+    def get_feed(self, user_id, limit = 10):
+        query = neo4j.CypherQuery(
+            self.db,
+            """
+            CYPHER 1.9
+            START author = node({id})
+            MATCH (article)-[?:posted_by]->(author)
+            RETURN article
+            LIMIT {max_articles}
+            """)
+        feeds = query.execute(id = user_id, max_articles = limit).data
+        logging.info('Found feeds %s' % feeds)
+        return { 'feeds':[{ 'text' : x.article['text'],
+                            'posted': x.article['posted'],
+                            'url': '/article/%d' % x.article._id }
+                          for x in feeds] }
+
+    def get_global_feed(self):
+        pass
+
+    def get_user_profile(self, user_id):
+        logging.info('Fetching profile for user: %s' % user_id)
+        query = neo4j.CypherQuery(
+            self.db,
+            """
+            CYPHER 1.9
+            START user = node({id})
+            MATCH
+            (user)-[?:follows]->(followed),
+            (follower)-[?:follows]->(user)
+            RETURN user, followed, follower
+            """)
+        data = query.execute(id = user_id).data
+        
+        # Because using the original JSON would be too simple...
+        followed, followers = [], []
+        def node_to_user(node):
+            return { 'name': node['name'],
+                     'registered': node['registered'],
+                     'id': node._id }
+        for row in data:
+            followed.append(node_to_user(row.followed))
+            followers.append(node_to_user(row.follower))
+        return { 'user': node_to_user(data[0].user),
+                 'followed': followed,
+                 'followers': followers }
+
     def follow(self, follower_id, followed_id):
         self.db.create(rel(follower_id, 'follows', followed_id))
 
     def unfollow(self, follower_id, followed_id):
-        pass
-
-    def get_feed(self, user_id):
-        pass
-
-    def get_global_feed(self):
-        pass
+        query = neo4j.CypherQuery(
+            self.db,
+            """
+            CYPHER 1.9
+            START
+            followed = node({followed_id}),
+            follower = node({follower_id}),
+            MATCH (follower)-[r?:follows]->(followed)
+            DELETE r
+            RETURN null
+            """)
+        query.execute(follower_id = follower_id, followed_id = followed_id)
 
 class BaseHandler(tornado.web.RequestHandler):
 
     @property
     def crud(self):
-        if not self._crud:
-                self._crud = IntjCrud()
+        if not self._crud: self._crud = IntjCrud()
         return self._crud
 
     def __init__(self, application, request, **kwargs):
@@ -179,11 +147,12 @@ class BaseHandler(tornado.web.RequestHandler):
     def get_login_url(self):
         return '/login'
 
-    def get_profile_url(self):
-        return '/profile'
+    def get_network_url(self):
+        return '/social-network'
 
     def get_current_user(self):
         user_json = self.get_secure_cookie('user')
+        logging.info('Current user: %s' % user_json)
         return user_json and tornado.escape.json_decode(user_json)
     
     def report_error(self):
@@ -248,31 +217,37 @@ class LoginHandler(BaseHandler):
         
         if can_login:
             self.set_current_user(password_encrypted)
-            self.redirect(self.get_profile_url())
+            self.redirect(self.get_network_url())
         else:
             self.report_error()
 
-class ProfileHandler(BaseHandler):
+class SocialNetworkHandler(BaseHandler):
     
     def get(self):
-        self.render(self.resolve_url('profile.html'))
-
-class EditorHandler(BaseHandler):
-    
-    def get(self):
-        self.render(self.resolve_url('editor.html'))
+        self.render(self.resolve_url('social-network.html'))
 
 class FeedHandler(BaseHandler):
     
     def post(self, user_id):
-        self.write({ 'feeds':[{'title': 'Foo', 'url': '/feed/123' },
-                              {'title': 'Baz', 'url': '/feed/456' },
-                              {'title': 'Bar', 'url': '/feed/789' }]})
+        if not user_id or user_id == 'me':
+            user_password = self.get_current_user()
+            user_id = self.crud.get_user_by_password(user_password)._id
+        self.write(self.crud.get_feed(user_id))
+
+class ProfileHandler(BaseHandler):
+    
+    def post(self, user_id):
+        if not user_id or user_id == 'me':
+            user_password = self.get_current_user()
+            user_id = self.crud.get_user_by_password(user_password)._id
+        logging.info('Will show info for user: %s' % user_id)
+        response = self.crud.get_user_profile(user_id)
+        logging.info('Profile info: %s' % response)
+        self.write(response)
 
 class PostHandler(BaseHandler):
     
     def post(self):
-        # tornado.escape.json_decode(self.request.body)
         article = re.sub(r'<', r'&lt;',
                          re.sub(r'>', r'&gt;', self.request.body))
         user_password = self.get_current_user()
@@ -280,17 +255,23 @@ class PostHandler(BaseHandler):
         user = self.crud.get_user_by_password(user_password)
         self.crud.post_message(user._id, article)
 
-class SocialNetwork():
+class ArticleHandler(BaseHandler):
+    
+    def post(self, article_id):
+        self.crud.get_article(article_id)
+
+class SocialNetwork(object):
 
     def __init__(self):
         tornado.options.parse_command_line()
         logging.info('Starting Tornado web server on http://localhost:%s' % options.port)
         self.application = tornado.web.Application([
             (r'/login', LoginHandler),
-            (r'/profile', ProfileHandler),
-            (r'/editor', EditorHandler),
+            (r'/social-network', SocialNetworkHandler),
             (r'/post', PostHandler),
+            (r'/profile/([^\/]+)', ProfileHandler),
             (r'/feed/([^\/]+)', FeedHandler),
+            (r'/article/([^\/]+)', ArticleHandler),
         ], **settings)
         self.application.listen(options.port, **server_settings)
         tornado.ioloop.IOLoop.instance().start()

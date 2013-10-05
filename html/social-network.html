@@ -16,29 +16,29 @@
     <div class="container">
       <div class="content">
         <ul class="nav nav-pills">
-          <li class="active"><a href="#all-feeds">All Feeds</a></li>
-          <li><a href="#my-feed">My Feed</a></li>
-          <li><a href="#my-profile">My Profile</a></li>
-          <li><a href="#my-next-post">My Next Post</a></li>
+          <li id="all-feeds-tab"><a href="#all-feeds">All Feeds</a></li>
+          <li id="my-feeds-tab"><a href="#my-feed">My Feed</a></li>
+          <li id="my-profile-tab"><a href="#my-profile">My Profile</a></li>
+          <li id="next-post-tab"><a href="#my-next-post">My Next Post</a></li>
         </ul>
       </div>
-      <div id="post-editor invisible">
+      <div id="post-editor" class="invisible">
         <div class="block">
           <button class="btn primary spaced" id="post"
                   type="submit">Post My Article</button>
-          <button class="btn primary spaced" id="profile"
+          <button class="btn primary spaced" id="clear"
                   type="submit">Don't Post My Article</button>
         </div>
         <div id="epiceditor" class="block"></div>
         <div id="notification"></div>
       </div>
-      <div id="all-feeds-view invisible">
+      <div id="all-feeds-view" class="invisible">
         Here go all feeds
       </div>
-      <div id="my-feeds-view invisible">
+      <div id="my-feeds-view" class="invisible">
         Here go my feeds
       </div>
-      <div id="my-profile-view invisible">
+      <div id="my-profile-view" class="invisible">
         Here goes my profile
       </div>
       </div>
@@ -54,7 +54,7 @@
         <div class="list-group" id="<%= id %>">
           <% _.each(feeds, function (data) { %>
           <a href="<%- data.url %>" class="list-group-item<%= data.active ? 'active' : ''%>">
-            <%= data.title %>
+            <%= data.text %>
           </a>
           <% }) %>
         </div>
@@ -83,7 +83,7 @@
         </ul>
       </textarea>
       <!--
-          argsugments
+          arguments
           
           user: { name: string, id: string }
           followed: [ { url: string, name: string }* ]
@@ -101,7 +101,7 @@
           <% }) %>
         </div>
         <h2>People following me</h2>
-        <div class="list-group" id="<%= followerId %>">
+        <div class="list-group" id="<%= followersId %>">
           <% _.each(followers, function(follower) { %>
           <a href="<%= follower.url %>" class="list-group-item"><%= follower.name %></a>
           <% }) %>

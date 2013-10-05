@@ -38,4 +38,4 @@ legend {
     background-position: calc(100% - 20px) 50%;
 }
 
-.template { display: none }
+.template, .invisible { display: none }
