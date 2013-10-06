@@ -17,9 +17,9 @@ class worker(multiprocessing.Process):
     def run(self):
         SocialNetwork()
 
-    def stop(self, timeout = 0):
+    def stop(self, timeout = 5):
         tornado.ioloop.IOLoop.instance().stop()
-        time.sleep(5)
+        time.sleep(timeout)
         self.terminate()
 
 class CollectorTestCase(unittest.TestCase):
@@ -35,6 +35,9 @@ class CollectorTestCase(unittest.TestCase):
         self._worker.stop()
 
     def test_register_user(self):
+        # Seems like this won't save cookies, so the test
+        # can never succeed, will need to think of something else...
+        # Maybe Selenium?
         requests.get(r'http://localhost/login')
         requests.post(r'http://localhost/login',
                       data = { 'username': 'test',

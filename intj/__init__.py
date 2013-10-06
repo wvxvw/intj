@@ -81,20 +81,46 @@ class IntjCrud():
                             'url': '/article/%d' % x.article._id }
                           for x in feeds] }
 
-    def get_global_feed(self):
-        pass
+    def get_all_feeds(self, limit = 10):
+        # If I knew how to substitute `*' for id, I could merge this
+        # into `get_feed'
+        query = neo4j.CypherQuery(
+            self.db,
+            """
+            CYPHER 1.9
+            START author = node(*)
+            MATCH (article)-[:posted_by]->(author)
+            RETURN article, author
+            LIMIT {max_articles}
+            """)
+        feeds = query.execute(max_articles = limit).data
+        logging.info('Found feeds %s' % feeds)
+        return { 'feeds':[{ 'text' : x.article['text'],
+                            'posted': x.article['posted'],
+                            'url': '/article/%d' % x.article._id,
+                            'author_id': x.author._id,
+                            'author_name': x.author['name'] }
+                          for x in feeds] }
+
+    def get_article(self, article_id):
+        return self.db.node(article_id)['text']
 
     def get_user_profile(self, user_id):
         logging.info('Fetching profile for user: %s' % user_id)
+        # Must be a bug in Cypher, there should be no need to
+        # use `DISTINCT' in this query, users can only follow
+        # other users once.
         query = neo4j.CypherQuery(
             self.db,
             """
             CYPHER 1.9
             START user = node({id})
             MATCH
-            (user)-[?:follows]->(followed),
-            (follower)-[?:follows]->(user)
-            RETURN user, followed, follower
+            (user)-[?:follows]->(_followed),
+            (_follower)-[?:follows]->(user)
+            RETURN user,
+            COLLECT(DISTINCT _followed) as followed,
+            COLLECT(DISTINCT _follower) as follower
             """)
         data = query.execute(id = user_id).data
         
@@ -105,14 +131,15 @@ class IntjCrud():
                      'registered': node['registered'],
                      'id': node._id }
         for row in data:
-            followed.append(node_to_user(row.followed))
-            followers.append(node_to_user(row.follower))
+            followed += map(node_to_user, row.followed)
+            followers += map(node_to_user, row.follower)
         return { 'user': node_to_user(data[0].user),
                  'followed': followed,
                  'followers': followers }
 
     def follow(self, follower_id, followed_id):
-        self.db.create(rel(follower_id, 'follows', followed_id))
+        self.db.create(rel(self.db.node(follower_id),
+                           'follows', self.db.node(followed_id)))
 
     def unfollow(self, follower_id, followed_id):
         query = neo4j.CypherQuery(
@@ -144,11 +171,20 @@ class BaseHandler(tornado.web.RequestHandler):
     def resolve_url(self, url):
         return '../html/' + url
 
+    def resolve_and_render(self, url):
+        self.render(self.resolve_url(url))
+
     def get_login_url(self):
         return '/login'
 
     def get_network_url(self):
         return '/social-network'
+
+    def get_article_url(self):
+        return '/article'
+
+    def get_profile_url(self):
+        return '/profile'
 
     def get_current_user(self):
         user_json = self.get_secure_cookie('user')
@@ -167,10 +203,19 @@ class BaseHandler(tornado.web.RequestHandler):
         else:
             self.clear_cookie('user')
 
+    def get_current_user_id(self):
+        return self.crud.get_user_by_password(self.get_current_user())._id
+
+    def ensure_current_user_id(self, maybe_id):
+        if not maybe_id or maybe_id == 'me':
+            return self.get_current_user_id()
+        else:
+            return int(maybe_id)
+
 class LoginHandler(BaseHandler):
 
     def get(self):
-        self.render(self.resolve_url('login.html'))
+        self.resolve_and_render('login.html')
 
     def register(self, username, password):
         logging.info('Registering new user %s with password %s' % (username, password))
@@ -224,41 +269,56 @@ class LoginHandler(BaseHandler):
 class SocialNetworkHandler(BaseHandler):
     
     def get(self):
-        self.render(self.resolve_url('social-network.html'))
+        self.resolve_and_render('social-network.html')
 
 class FeedHandler(BaseHandler):
     
     def post(self, user_id):
-        if not user_id or user_id == 'me':
-            user_password = self.get_current_user()
-            user_id = self.crud.get_user_by_password(user_password)._id
-        self.write(self.crud.get_feed(user_id))
+        if not user_id or user_id == 'all':
+            self.write(self.crud.get_all_feeds())
+        else:
+            self.write(self.crud.get_feed(
+                self.ensure_current_user_id(user_id)))
 
 class ProfileHandler(BaseHandler):
+
+    def get(self, user_id):
+        self.resolve_and_render('profile.html')
     
     def post(self, user_id):
-        if not user_id or user_id == 'me':
-            user_password = self.get_current_user()
-            user_id = self.crud.get_user_by_password(user_password)._id
-        logging.info('Will show info for user: %s' % user_id)
-        response = self.crud.get_user_profile(user_id)
-        logging.info('Profile info: %s' % response)
-        self.write(response)
+        self.write(self.crud.get_user_profile(
+            self.ensure_current_user_id(user_id)))
 
 class PostHandler(BaseHandler):
     
     def post(self):
+        # Need to promote maximum article length to some sort of
+        # settings
+        article = self.request.body
         article = re.sub(r'<', r'&lt;',
-                         re.sub(r'>', r'&gt;', self.request.body))
-        user_password = self.get_current_user()
+                         re.sub(r'>', r'&gt;',
+                                article[:min(1024, len(article))]))
         # This can be reduced to a single query
-        user = self.crud.get_user_by_password(user_password)
+        user = self.crud.get_user_by_password(self.get_current_user())
         self.crud.post_message(user._id, article)
 
 class ArticleHandler(BaseHandler):
+
+    def get(self, article_id):
+        self.resolve_and_render('article.html')
     
     def post(self, article_id):
-        self.crud.get_article(article_id)
+        self.write(self.crud.get_article(article_id))
+
+class FollowHandler(BaseHandler):
+    
+    def post(self, follower_id):
+        self.crud.follow(int(follower_id), self.get_current_user_id())
+
+class UnfollowHandler(BaseHandler):
+    
+    def post(self, follower_id):
+        self.crud.unfollow(int(follower_id), self.get_current_user_id())
 
 class SocialNetwork(object):
 
@@ -272,6 +332,8 @@ class SocialNetwork(object):
             (r'/profile/([^\/]+)', ProfileHandler),
             (r'/feed/([^\/]+)', FeedHandler),
             (r'/article/([^\/]+)', ArticleHandler),
+            (r'/follow/([^\/]+)', FollowHandler),
+            (r'/unfollow/([^\/]+)', UnfollowHandler),
         ], **settings)
         self.application.listen(options.port, **server_settings)
         tornado.ioloop.IOLoop.instance().start()

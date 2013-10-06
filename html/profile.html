@@ -2,111 +2,71 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>INTJ Social Network</title>
+    <title>Profile</title>
     <link href="../css/bootstrap.css" rel="stylesheet">
     <link href="../css/intj.css" rel="stylesheet">
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
     <script src="../js/bootstrap.min.js"></script>
-    <script src="../js/underscore.js"></script>
     <!-- <script src="../js/underscore.min.js"></script> -->
+    <script src="../js/underscore.js"></script>
     <script src="../js/epiceditor.min.js"></script>
     <script src="../js/intj.js"></script>
+    <script src="../js/profile.js"></script>
   </head>
   <body>
     <div class="container">
       <div class="content">
-        <ul class="nav nav-pills">
-          <li class="active"><a href="#all-feeds">All Feeds</a></li>
-          <li><a href="#my-feed">My Feed</a></li>
-          <li><a href="#my-profile">My Profile</a></li>
-          <li><a href="#my-next-post">My Next Post</a></li>
-        </ul>
-      </div>
-      <div id="post-editor invisible">
         <div class="block">
-          <button class="btn primary spaced" id="post"
-                  type="submit">Post My Article</button>
-          <button class="btn primary spaced" id="profile"
-                  type="submit">Don't Post My Article</button>
+          <button class="btn primary spaced" id="follow"
+                  type="submit">Follow!</button>
+          <button class="btn primary spaced" id="unfollow"
+                  type="submit">Stop Following!</button>
         </div>
-        <div id="epiceditor" class="block"></div>
-        <div id="notification"></div>
+        <div id="info"></div>
+        <div id="feed"></div>
       </div>
-      <div id="all-feeds-view invisible">
-        Here go all feeds
-      </div>
-      <div id="my-feeds-view invisible">
-        Here go my feeds
-      </div>
-      <div id="my-profile-view invisible">
-        Here goes my profile
-      </div>
-      </div>
-      <!--
-          arguments
-
-          feeds: [ { url: string, title: string, active?: boolean } ]
-          title: string,
-          id: string
-        -->
-      <textarea id="feeds-tpl" class="template">
-        <h2><%= title %></h2>
-        <div class="list-group" id="<%= id %>">
-          <% _.each(feeds, function (data) { %>
-          <a href="<%- data.url %>" class="list-group-item<%= data.active ? 'active' : ''%>">
-            <%= data.title %>
-          </a>
-          <% }) %>
-        </div>
-      </textarea>
-      <!--
-          arguments
-
-          pages: [ { url: string, number: number, active?: boolean }* ]
-          id: string
-        -->
-      <textarea id="pagination-tpl" class="template">
-        <ul class="pagination" id="<%= id %>">
-          <li class="disabled"><a href="#previous-page">«</a></li>
-          <% _.each(pages, function(page) { %>
-          <% if (page.current) { %>
-          <li class="active"><a href="<%= page.url %>">
-              <%= page.number %>
-              <span class="sr-only">(current)</span></a></li>
-          <% } else { %>
-          <li><a href="<%= page.url %>">
-              <%= page.number %>
-          </a></li>
-          <% } %>
-          <% }) %>
-          <li class="disabled"><a href="#next-page">»</a></li>
-        </ul>
-      </textarea>
-      <!--
-          argsugments
-          
-          user: { name: string, id: string }
-          followed: [ { url: string, name: string }* ]
-          followers: [ { url: string, name: string }* ]
-          followedId: string
-          followersId: string
-        -->
-      <textarea id="profile-tpl" class="template">
-        <h2>My name:</h2><span><%= user.name %></span>
-        <h2>My id:</h2><span><%= user.id %></span>
-        <h2>People I follow</h2>
-        <div class="list-group" id="<%= followedId %>">
-          <% _.each(followed, function(followed) { %>
-          <a href="<%= followed.url %>" class="list-group-item"><%= followed.name %></a>
-          <% }) %>
-        </div>
-        <h2>People following me</h2>
-        <div class="list-group" id="<%= followerId %>">
-          <% _.each(followers, function(follower) { %>
-          <a href="<%= follower.url %>" class="list-group-item"><%= follower.name %></a>
-          <% }) %>
-        </div>
-      </textarea>
     </div>
-</body>
+    <!--
+        arguments
+        
+        user: { name: string, id: string }
+        followed: [ { url: string, name: string }* ]
+        followers: [ { url: string, name: string }* ]
+        followedId: string
+        followersId: string
+      -->
+    <textarea id="profile-tpl" class="template">
+      <h2>My name:</h2><span><%= user.name %></span>
+      <h2>My id:</h2><span><%= user.id %></span>
+      <h2>Followers</h2>
+      <div class="list-group" id="<%= followedId %>">
+        <% _.each(followed, function(followed) { %>
+        <a href="/profile/<%= followed.id %>" class="list-group-item"><%= followed.name %></a>
+        <% }) %>
+      </div>
+      <h2>Followed</h2>
+      <div class="list-group" id="<%= followerId %>">
+        <% _.each(followers, function(follower) { %>
+        <a href="/profile/<%= follower.id %>" class="list-group-item"><%= follower.name %></a>
+        <% }) %>
+      </div>
+    </textarea>
+    <!--
+        arguments
+
+        feeds: [ { url: string, title: string, active?: boolean } ]
+        title: string,
+        id: string
+      -->
+    <textarea id="feeds-tpl" class="template">
+      <h2><%= title %></h2>
+      <div class="list-group" id="<%= id %>">
+        <% _.each(feeds, function (data) { %>
+        <a href="<%- data.url %>" class="list-group-item<%= data.active ? 'active' : ''%>">
+          <%= data.text %>
+        </a>
+        <% }) %>
+      </div>
+    </textarea>
+  </body>
 </html>
