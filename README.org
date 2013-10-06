@@ -138,6 +138,53 @@
    Again, we already have the content, just write the aggreate
    functions and be done with it.
 
+* Installation
+  All instructions are given for Fedora Core 18, but should
+  be similar for Debian-like distributions. Substitute =apt-get=
+  for =yum= where appropriate.
+
+  First, install =nginx= server:
+  : sudo yum install nginx
+
+  Next, download and set up =neo4j= from: [[http://www.neo4j.org/download/linux][neo4j]], follow
+  the installation instructions.
+
+  Stop (if started) =nginx= server:
+  : nginx -s stop
+
+  Start =nginx= server with custom configuration file found
+  in [[./etc/nginx.conf][nginx.conf]] by running:
+  : nginx -c /path/to/nginx.conf
+
+  Run [[./setup.py][setup.py]]:
+  : sudo python ./setup.py
+
+  Check that [[./main.py][main.py]] has execute permission, if not do:
+  : chmod +x ./main.py
+
+  Now you should be able to launch the Tornado server:
+  : ./main.py &
+
+* Site Map
+  The site consists of the following pages:
+
+** /login
+   This is where users log in or register.
+
+** /social-network
+   This is the page where users read each other feeds, change
+   their profile info, view their own feeds and write new articles.
+
+** /profile
+   This page displays the user's profile (the currently logged in
+   user or the one given by the =user_id= verb following next in the URI.
+   Users can also =follow= and =unfollow= the profile owner from this
+   page.
+
+** /article
+   This is the page where users read single articles. Articles are
+   given by the =article_id= verb following next in the URI.
+  
 * Project Description
   Right now I'm thinking about making it into a [[http://en.wikipedia.org/wiki/Nomic][nomic]] game.  The basic
   idea would be that by posting users may, in general, score
